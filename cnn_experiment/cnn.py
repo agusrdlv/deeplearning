@@ -121,7 +121,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(
         train_dataset,
         batch_size=128,  # This can be a hyperparameter
-        shuffle=True,
+        shuffle=False,
         collate_fn=pad_sequences,
         drop_last=False
     )
