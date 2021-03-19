@@ -52,7 +52,8 @@ class CNNClassifier(nn.Module):
             self.convs.append(
                 nn.Conv1d(vector_size, FILTERS_COUNT, filter_lenght)
             )
-        self.dropout = dropout
+        
+        self.dropout_ = nn.Dropout(dropout)
         self.convs = nn.ModuleList(self.convs)
         self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 2048)
         self.output = nn.Linear(2048, 632)
@@ -67,7 +68,7 @@ class CNNClassifier(nn.Module):
         x = [self.conv_global_max_pool(x, conv) for conv in self.convs]
         x = torch.cat(x, dim=1)
         x = F.relu(self.fc(x))
-        x = self.dropout(x)  
+        x = self.dropout_(x)  
         logit = self.fc(x) 
         return logit
 
