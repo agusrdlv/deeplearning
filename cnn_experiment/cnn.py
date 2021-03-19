@@ -54,8 +54,8 @@ class CNNClassifier(nn.Module):
             )
         self.dropout = dropout
         self.convs = nn.ModuleList(self.convs)
-        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 4096)
-        self.output = nn.Linear(4096, 1)
+        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 2048)
+        self.output = nn.Linear(2048, 632)
         self.vector_size = vector_size
     
     @staticmethod
@@ -67,9 +67,9 @@ class CNNClassifier(nn.Module):
         x = [self.conv_global_max_pool(x, conv) for conv in self.convs]
         x = torch.cat(x, dim=1)
         x = F.relu(self.fc(x))
-        x = torch.sigmoid(self.output(x))
-        return x
-
+        x = self.dropout(x)  
+        logit = self.fc(x) 
+        return logit
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
