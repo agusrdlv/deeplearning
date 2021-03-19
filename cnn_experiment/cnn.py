@@ -68,8 +68,8 @@ class CNNClassifier(nn.Module):
         x = torch.cat(x, dim=1)
         x = F.relu(self.fc(x))
     #    x = self.dropout_(x)  
-        logit = self.fc(x) 
-        return logit
+    #    logit = self.fc(x) 
+        return x
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
