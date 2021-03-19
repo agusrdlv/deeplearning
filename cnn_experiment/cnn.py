@@ -28,7 +28,7 @@ class CNNClassifier(nn.Module):
                  token_to_index,
                  n_labels,
                  dropout=0.3,
-                 vector_size=300,
+                 vector_size=2048,
                  freeze_embedings=True,
                  FILTERS_LENGTH = [2, 3, 4],
                  FILTERS_COUNT = 20):
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     )
     train_loader = DataLoader(
         train_dataset,
-        batch_size=128,  # This can be a hyperparameter
+        batch_size=2048,  # This can be a hyperparameter
         shuffle=False,
         collate_fn=pad_sequences,
         drop_last=False
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         )
         validation_loader = DataLoader(
             validation_dataset,
-            batch_size=128,
+            batch_size=2048,
             shuffle=False,
             collate_fn=pad_sequences,
             drop_last=False
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         )
         test_loader = DataLoader(
             test_dataset,
-            batch_size=128,
+            batch_size=2048,
             shuffle=False,
             collate_fn=pad_sequences,
             drop_last=False

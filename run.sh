@@ -28,5 +28,5 @@ python -m cnn_experiment.cnn \
     --pretrained-embeddings ./data/SBW-vectors-300-min5.txt.gz \
     --language spanish \
     --validation-data ./data/meli-challenge-2019/spanish.validation.jsonl.gz \
-    --embeddings-size 300 \
+    --embeddings-size 2048 \
     --dropout 0.3
