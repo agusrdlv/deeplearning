@@ -103,11 +103,12 @@ if __name__ == "__main__":
                         type=int)
     parser.add_argument("--FILTERS_LENGTH",
                         help="filters lenght",
-                        default=20,
+                        default=[2, 3, 4],
                         type=int)
 
     args = parser.parse_args()
 
+    FILTERS_LENGTH = [2, 3, 4]
     pad_sequences = PadSequences(
         min_length=max(FILTERS_LENGTH)
     )
