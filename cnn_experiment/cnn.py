@@ -101,6 +101,10 @@ if __name__ == "__main__":
                         help="Number of epochs",
                         default=5,
                         type=int)
+    parser.add_argument("--FILTERS_LENGTH",
+                        help="filters lenght",
+                        default=20,
+                        type=int)
 
     args = parser.parse_args()
 
