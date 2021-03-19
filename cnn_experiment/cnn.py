@@ -28,10 +28,10 @@ class CNNClassifier(nn.Module):
                  token_to_index,
                  n_labels,
                  dropout=0.3,
-                 vector_size=2048,
+                 vector_size=300,
                  freeze_embedings=True,
                  FILTERS_LENGTH = [2, 3, 4],
-                 FILTERS_COUNT = 20):
+                 FILTERS_COUNT = 100):
         super().__init__()
         with gzip.open(token_to_index, "rt") as fh:
             token_to_index = json.load(fh)
@@ -55,8 +55,8 @@ class CNNClassifier(nn.Module):
         
         self.dropout_ = nn.Dropout(dropout)
         self.convs = nn.ModuleList(self.convs)
-        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 2048)
-        self.output = nn.Linear(2048, 632)
+        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 128)
+        self.output = nn.Linear(128, 632)
         self.vector_size = vector_size
     
     @staticmethod
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     )
     train_loader = DataLoader(
         train_dataset,
-        batch_size=2048,  # This can be a hyperparameter
+        batch_size=128,  # This can be a hyperparameter
         shuffle=False,
         collate_fn=pad_sequences,
         drop_last=False
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         )
         validation_loader = DataLoader(
             validation_dataset,
-            batch_size=2048,
+            batch_size=128,
             shuffle=False,
             collate_fn=pad_sequences,
             drop_last=False
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         )
         test_loader = DataLoader(
             test_dataset,
-            batch_size=2048,
+            batch_size=128,
             shuffle=False,
             collate_fn=pad_sequences,
             drop_last=False
@@ -184,7 +184,7 @@ if __name__ == "__main__":
             vector_size=args.embeddings_size,
             freeze_embedings=True,
             FILTERS_LENGTH = [2, 3, 4],
-            FILTERS_COUNT = 20,  # This can be a hyperparameter
+            FILTERS_COUNT = 100,  # This can be a hyperparameter
         )
         model = model.to(device)
         loss = nn.CrossEntropyLoss()
