@@ -55,8 +55,7 @@ class CNNClassifier(nn.Module):
         
         self.dropout_ = nn.Dropout(dropout)
         self.convs = nn.ModuleList(self.convs)
-        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 128)
-        self.output = nn.Linear(128, 632)
+        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 632)
         self.vector_size = vector_size
     
     @staticmethod
