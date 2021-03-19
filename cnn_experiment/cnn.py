@@ -176,9 +176,9 @@ if __name__ == "__main__":
             n_labels=train_dataset.n_labels,
             dropout=args.dropout,
             vector_size=args.embeddings_size,
-            freeze_embedings=True
+            freeze_embedings=True,
             FILTERS_LENGTH = [2, 3, 4],
-            FILTERS_COUNT = 20  # This can be a hyperparameter
+            FILTERS_COUNT = 20,  # This can be a hyperparameter
         )
         model = model.to(device)
         loss = nn.CrossEntropyLoss()
