@@ -53,10 +53,9 @@ class CNNClassifier(nn.Module):
             self.convs.append(
                 nn.Conv1d(vector_size, FILTERS_COUNT, filter_lenght)
             )
-        
-        self.dropout_ = nn.Dropout(dropout)
         self.convs = nn.ModuleList(self.convs)
-        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), cats)
+        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), cats * 4)
+        self.output = nn.Linear(cats * 4, cats)
         self.vector_size = vector_size
     
     @staticmethod
@@ -67,8 +66,8 @@ class CNNClassifier(nn.Module):
         x = self.embeddings(x).transpose(1, 2)  # Conv1d takes (batch, channel, seq_len)
         x = [self.conv_global_max_pool(x, conv) for conv in self.convs]
         x = torch.cat(x, dim=1)
-        x = nn.Softmax(self.fc(x))
-
+        x = F.relu(self.fc(x))
+        x = nn.Softmax(self.output(x))
         return x
 
 if __name__ == "__main__":
