@@ -31,7 +31,8 @@ class CNNClassifier(nn.Module):
                  vector_size=300,
                  freeze_embedings=True,
                  FILTERS_LENGTH = [2, 3, 4],
-                 FILTERS_COUNT = 100):
+                 FILTERS_COUNT = 100,
+                 cats=632):
         super().__init__()
         with gzip.open(token_to_index, "rt") as fh:
             token_to_index = json.load(fh)
@@ -55,19 +56,26 @@ class CNNClassifier(nn.Module):
         
         self.dropout_ = nn.Dropout(dropout)
         self.convs = nn.ModuleList(self.convs)
-        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), 632)
+        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), cats * 3)
+        self.output = nn.Linear(cats * 3, cats)
         self.vector_size = vector_size
     
     @staticmethod
     def conv_global_max_pool(x, conv):
-        return F.relu(conv(x).transpose(1, 2).max(1)[0])
+        return F.max_pool1d(conv(x).transpose(1, 2).max(1)[0])
+    
+    def conv_global_avg_pool(x, conv):
+        return F.avg_pool1d(conv(x).transpose(1, 2).max(1)[0])
     
     def forward(self, x):
         x = self.embeddings(x).transpose(1, 2)  # Conv1d takes (batch, channel, seq_len)
-        x = [self.conv_global_max_pool(x, conv) for conv in self.convs]
+        x = [self.conv_global_avg_pool(x, conv) for conv in self.convs]
         x = torch.cat(x, dim=1)
         x = F.relu(self.fc(x))
+        x = self.dropout_(x)
+        x = F.softmax(self.output(x))          
         return x
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
