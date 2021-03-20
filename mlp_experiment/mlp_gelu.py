@@ -22,17 +22,16 @@ logging.basicConfig(
 )
 
 
-class CNNClassifier(nn.Module):
+class MLPClassifier(nn.Module):
     def __init__(self,
                  pretrained_embeddings_path,
                  token_to_index,
                  n_labels,
+                 hidden_layers1=[4096, 2048],
+                 hidden_layers2=[2048, 1024],
                  dropout=0.3,
                  vector_size=300,
-                 freeze_embedings=True,
-                 FILTERS_LENGTH = [2, 3, 4],
-                 FILTERS_COUNT = 100,
-                 cats=632):
+                 freeze_embedings=True):
         super().__init__()
         with gzip.open(token_to_index, "rt") as fh:
             token_to_index = json.load(fh)
@@ -47,40 +46,42 @@ class CNNClassifier(nn.Module):
                         torch.FloatTensor([float(n) for n in vector.split()])
         self.embeddings = nn.Embedding.from_pretrained(embeddings_matrix,
                                                        freeze=freeze_embedings,
-                                                       padding_idx=0)    
-        self.convs = []
-        for filter_lenght in FILTERS_LENGTH:
-            self.convs.append(
-                nn.Conv1d(vector_size, FILTERS_COUNT, filter_lenght)
+                                                       padding_idx=0)
+        self.hidden_layers1 = [
+            nn.Linear(vector_size, hidden_layers1[0])
+        ]
+        for input_size, output_size in zip(hidden_layers1[:-1], hidden_layers1[1:]):
+            self.hidden_layers1.append(
+                nn.Linear(input_size, output_size)
             )
-            self.max_pool = nn.MaxPool1d(
-                kernel_size=filter_lenght,
-                stride=None,
-                padding=0,
-                dilation=1,
-                return_indices=False,
-                ceil_mode=False
+        self.dropout = dropout
+        self.hidden_layers1 = nn.ModuleList(self.hidden_layers1)
+
+        self.hidden_layers2 = [
+            nn.Linear(vector_size, hidden_layers2[0])
+        ]
+        for input_size, output_size in zip(hidden_layers2[:-1], hidden_layers2[1:]):
+            self.hidden_layers2.append(
+                nn.Linear(input_size, output_size)
             )
-        self.dropout_ = nn.Dropout(dropout)
-        self.convs = nn.ModuleList(self.convs)
-        self.fc = nn.Linear(FILTERS_COUNT * len(FILTERS_LENGTH), cats * 3)
-        self.output = nn.Linear(cats * 3, cats)
+        self.dropout = dropout
+        self.hidden_layers2 = nn.ModuleList(self.hidden_layers2)
+
+        self.output = nn.Linear(hidden_layers2[-1], n_labels)
         self.vector_size = vector_size
-    
-    @staticmethod
-    def conv_global_max_pool(x, conv):
-        return F.max_pool1d(conv(x).transpose(1, 2).max(1)[0], )
-    
-    def conv_global_avg_pool(x, conv):
-        return F.avg_pool1d(conv(x).transpose(1, 2).max(1)[0])
-    
+
     def forward(self, x):
-        x = self.embeddings(x).transpose(1, 2)  # Conv1d takes (batch, channel, seq_len)
-        x = [self.conv_global_max_pool(x, conv) for conv in self.convs]
-        x = torch.cat(x, dim=1)
-        x = F.relu(self.fc(x))
-        x = self.dropout_(x)
-        x = F.softmax(self.output(x))          
+        x = self.embeddings(x)
+        x = torch.mean(x, dim=1)
+        for layer in self.hidden_layers1:
+            x = F.relu(layer(x))
+            if self.dropout:
+                x = F.dropout(x, self.dropout)
+        for layer in self.hidden_layers2:
+            x = F.gelu(layer(x))
+            if self.dropout:
+                x = F.dropout(x, self.dropout)
+        x = self.output(x)
         return x
 
 
@@ -112,18 +113,18 @@ if __name__ == "__main__":
                         type=float)
     parser.add_argument("--epochs",
                         help="Number of epochs",
-                        default=5,
+                        default=3,
                         type=int)
-    parser.add_argument("--FILTERS_LENGTH",
-                        help="filters lenght",
-                        default=[2, 3, 4],
+    parser.add_argument("--n_labels",
+                        help="Number of labels",
+                        default=632,
                         type=int)
-
     args = parser.parse_args()
 
-    FILTERS_LENGTH = [2, 3, 4]
     pad_sequences = PadSequences(
-        min_length=max(FILTERS_LENGTH)
+        pad_value=0,
+        max_length=None,
+        min_length=1
     )
 
     logging.info("Building training dataset")
@@ -133,7 +134,7 @@ if __name__ == "__main__":
     )
     train_loader = DataLoader(
         train_dataset,
-        batch_size=128,  # This can be a hyperparameter
+        batch_size=4096,  # This can be a hyperparameter
         shuffle=False,
         collate_fn=pad_sequences,
         drop_last=False
@@ -147,7 +148,7 @@ if __name__ == "__main__":
         )
         validation_loader = DataLoader(
             validation_dataset,
-            batch_size=128,
+            batch_size=4096,
             shuffle=False,
             collate_fn=pad_sequences,
             drop_last=False
@@ -164,7 +165,7 @@ if __name__ == "__main__":
         )
         test_loader = DataLoader(
             test_dataset,
-            batch_size=128,
+            batch_size=4096,
             shuffle=False,
             collate_fn=pad_sequences,
             drop_last=False
@@ -179,8 +180,9 @@ if __name__ == "__main__":
         logging.info("Starting experiment")
         # Log all relevent hyperparameters
         mlflow.log_params({
-            "model_type": "CNN",
+            "model_type": "Multilayer Perceptron",
             "embeddings": args.pretrained_embeddings,
+            "hidden_layers": args.hidden_layers,
             "dropout": args.dropout,
             "embeddings_size": args.embeddings_size,
             "epochs": args.epochs
@@ -188,15 +190,14 @@ if __name__ == "__main__":
         device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         logging.info("Building classifier")
-        model = CNNClassifier(
+        model = MLPClassifier(
             pretrained_embeddings_path=args.pretrained_embeddings,
             token_to_index=args.token_to_index,
             n_labels=train_dataset.n_labels,
+            hidden_layers=args.hidden_layers,
             dropout=args.dropout,
             vector_size=args.embeddings_size,
-            freeze_embedings=True,
-            FILTERS_LENGTH = [2, 3, 4],
-            FILTERS_COUNT = 100,  # This can be a hyperparameter
+            freeze_embedings=True  # This can be a hyperparameter
         )
         model = model.to(device)
         loss = nn.CrossEntropyLoss()
