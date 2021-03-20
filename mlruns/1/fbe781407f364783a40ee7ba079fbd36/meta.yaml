@@ -1,0 +1,15 @@
+artifact_uri: file:///users/aramello/deeplearning/mlruns/1/fbe781407f364783a40ee7ba079fbd36/artifacts
+end_time: 1616123910833
+entry_point_name: ''
+experiment_id: '1'
+lifecycle_stage: active
+name: ''
+run_id: fbe781407f364783a40ee7ba079fbd36
+run_uuid: fbe781407f364783a40ee7ba079fbd36
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1616123882406
+status: 4
+tags: []
+user_id: aramello
