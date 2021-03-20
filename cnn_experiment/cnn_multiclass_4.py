@@ -108,11 +108,11 @@ if __name__ == "__main__":
     parser.add_argument("--learning_rate",
                         help="learning rate",
                         default=1e-2,
-                        type=int)
+                        type=float)
     parser.add_argument("--weight_decay",
                         help="filters lenght",
                         default=1e-4,
-                        type=int)
+                        type=float)
 
     args = parser.parse_args()
 
