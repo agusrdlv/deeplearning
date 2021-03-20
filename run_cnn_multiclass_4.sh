@@ -22,11 +22,12 @@ export CUDA_HOME=/opt/cuda/10.1
 export PATH=$CUDA_HOME/bin:$PATH
 export CUDA_VISIBLE_DEVICES=0
 
-python -m cnn_experiment.cnn_multiclass_3 \
+python -m cnn_experiment.cnn_multiclass_4 \
     --train-data ./data/meli-challenge-2019/spanish.train.jsonl.gz \
     --token-to-index ./data/meli-challenge-2019/spanish_token_to_index.json.gz \
     --pretrained-embeddings ./data/SBW-vectors-300-min5.txt.gz \
     --language spanish \
     --validation-data ./data/meli-challenge-2019/spanish.validation.jsonl.gz \
     --embeddings-size 300 \
-    --FILTERS_LENGTH [2, 3, 4, 5]
+    --learning_rate 0.01 \
+    --weight_decay 0.001
