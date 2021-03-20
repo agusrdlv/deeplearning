@@ -67,7 +67,7 @@ class CNNClassifier(nn.Module):
         x = self.embeddings(x).transpose(1, 2)  # Conv1d takes (batch, channel, seq_len)
         x = [self.conv_global_max_pool(x, conv) for conv in self.convs]
         x = torch.cat(x, dim=1)
-        x = nn.Softmax(self.fc(x))
+        x = F.softmax(self.fc(x))
 
         return x
 

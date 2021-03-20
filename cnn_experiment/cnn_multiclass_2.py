@@ -67,7 +67,7 @@ class CNNClassifier(nn.Module):
         x = [self.conv_global_max_pool(x, conv) for conv in self.convs]
         x = torch.cat(x, dim=1)
         x = F.relu(self.fc(x))
-        x = nn.Softmax(self.output(x))
+        x = F.softmax(self.output(x))
         return x
 
 if __name__ == "__main__":
