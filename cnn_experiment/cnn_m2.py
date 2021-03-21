@@ -48,18 +48,31 @@ class CNNClassifier(nn.Module):
         self.embeddings = nn.Embedding.from_pretrained(embeddings_matrix,
                                                        freeze=freeze_embedings,
                                                        padding_idx=0)    
+       '''
+       Idea para probar el problema del kernel size de los max pool de las convoluciones
         self.convs = []
         for filter_lenght in FILTERS_LENGTH:
-            self.convs.append(
+            conv = convs(
                 nn.Conv1d(vector_size, FILTERS_COUNT, filter_lenght)
             )
-            self.max_pool = nn.MaxPool1d(
+            max_pool = nn.MaxPool1d(
                 kernel_size=filter_lenght,
                 stride=None,
                 padding=0,
                 dilation=1,
                 return_indices=False,
                 ceil_mode=False
+            )
+            self.convs.append( 
+                max_pool(
+                    conv
+                )
+            )
+        '''
+        self.convs = []
+        for filter_lenght in FILTERS_LENGTH:
+            self.convs.append(
+                nn.Conv1d(vector_size, FILTERS_COUNT, filter_lenght)
             )
         self.dropout_ = nn.Dropout(dropout)
         self.convs = nn.ModuleList(self.convs)
@@ -69,10 +82,10 @@ class CNNClassifier(nn.Module):
     
     @staticmethod
     def conv_global_max_pool(x, conv):
-        return F.max_pool1d(conv(x).transpose(1, 2).max(1)[0], )
+        return F.max_pool1d(conv(x).transpose(1, 2))
     
     def conv_global_avg_pool(x, conv):
-        return F.avg_pool1d(conv(x).transpose(1, 2).max(1)[0])
+        return F.avg_pool1d(conv(x).transpose(1, 2))
     
     def forward(self, x):
         x = self.embeddings(x).transpose(1, 2)  # Conv1d takes (batch, channel, seq_len)
