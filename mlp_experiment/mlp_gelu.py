@@ -182,7 +182,6 @@ if __name__ == "__main__":
         mlflow.log_params({
             "model_type": "Multilayer Perceptron",
             "embeddings": args.pretrained_embeddings,
-            "hidden_layers": args.hidden_layers,
             "dropout": args.dropout,
             "embeddings_size": args.embeddings_size,
             "epochs": args.epochs

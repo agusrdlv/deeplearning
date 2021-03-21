@@ -95,7 +95,7 @@ if __name__ == "__main__":
                         help="Sizes of the hidden layers of the MLP (can be one or more values)",
                         nargs="+",
                         default=[4096, 1024],
-                        type=list)
+                        type=int)
     parser.add_argument("--dropout",
                         help="Dropout to apply to each hidden layer",
                         default=0.3,
