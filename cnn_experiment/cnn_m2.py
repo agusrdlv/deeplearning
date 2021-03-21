@@ -47,28 +47,27 @@ class CNNClassifier(nn.Module):
                         torch.FloatTensor([float(n) for n in vector.split()])
         self.embeddings = nn.Embedding.from_pretrained(embeddings_matrix,
                                                        freeze=freeze_embedings,
-                                                       padding_idx=0)    
-       '''
-       Idea para probar el problema del kernel size de los max pool de las convoluciones
-        self.convs = []
-        for filter_lenght in FILTERS_LENGTH:
-            conv = convs(
-                nn.Conv1d(vector_size, FILTERS_COUNT, filter_lenght)
-            )
-            max_pool = nn.MaxPool1d(
-                kernel_size=filter_lenght,
-                stride=None,
-                padding=0,
-                dilation=1,
-                return_indices=False,
-                ceil_mode=False
-            )
-            self.convs.append( 
-                max_pool(
-                    conv
-                )
-            )
-        '''
+                                                       padding_idx=0
+                                                       )
+#Idea para probar el problema del kernel size de los max pool de las convoluciones
+#self.convs = []
+#for filter_lenght in FILTERS_LENGTH:
+#    conv = convs(
+#        nn.Conv1d(vector_size, FILTERS_COUNT, filter_lenght)
+#   )
+#    max_pool = nn.MaxPool1d(
+#        kernel_size=filter_lenght,
+#        stride=None,
+#        padding=0,
+#        dilation=1,
+#        return_indices=False,
+#        ceil_mode=False
+#    )
+#    self.convs.append( 
+#        max_pool(
+#            conv
+#        )
+#    )git pull
         self.convs = []
         for filter_lenght in FILTERS_LENGTH:
             self.convs.append(
