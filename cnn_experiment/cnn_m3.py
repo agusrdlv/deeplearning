@@ -62,10 +62,10 @@ class CNNClassifier(nn.Module):
     
     @staticmethod
     def conv_global_max_pool(x, conv):
-        return F.max_pool1d(conv(x).transpose(1, 2).max(1)[0])
+        return F.relu(conv(x).transpose(1, 2).max(1)[0])
     
     def conv_global_avg_pool(x, conv):
-        return F.avg_pool1d(conv(x).transpose(1, 2).max(1)[0])
+        return F.relu(conv(x).transpose(1, 2).mean(1)[0])
     
     def forward(self, x):
         x = self.embeddings(x).transpose(1, 2)  # Conv1d takes (batch, channel, seq_len)
