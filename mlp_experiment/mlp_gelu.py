@@ -75,8 +75,6 @@ class MLPClassifier(nn.Module):
         x = torch.mean(x, dim=1)
         for layer in self.hidden_layers1:
             x = F.relu(layer(x))
-            if self.dropout:
-                x = F.dropout(x, self.dropout)
         for layer in self.hidden_layers2:
             x = F.gelu(layer(x))
             if self.dropout:
